@@ -1,0 +1,13 @@
+[project]
+name = "pumpprobeFDTD"
+version = "0.1.0"
+authors = [{ name = "Tianchuang Luo" }]
+description = "A package for pump-probe FDTD simulations"
+dependencies = [
+    "numpy",
+    "scipy"
+]
+requires-python = ">=3.10"
+
+[project.license]
+text = "MIT"
