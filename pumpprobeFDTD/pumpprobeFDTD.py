@@ -3,7 +3,7 @@ from scipy.interpolate import interp1d
 from scipy.integrate import trapezoid
 from scipy.signal import convolve2d
 import scipy
-import myFFT
+from . import myFFT
 
 # unit conversion factors
 ps = 299.79246
@@ -50,6 +50,7 @@ class simulation:
         self.fparam = []
         self.yf = np.zeros((4,cell["y"]+1,cell["x"]+1)) # y coordinates used to create force array
         self.ys =  np.ones((cell["y"]+1,cell["x"]+1))*np.arange(cell["y"]+1)[:,np.newaxis] # y coordinates across the cell
+        self.cell = cell
     def curl_E(self):
         '''
         Compute the curl field of E, taking care of boundary conditions
@@ -70,6 +71,7 @@ class simulation:
         '''
         Add a lorentzian oscillator with parameters f, b1E, bE1, gamma defined in a rectangel xstart<x<xend, ystart<y<yend
         '''
+        cell = self.cell
         self.Lorentzian.append({"f":f,"b1E":b1E,"bE1":bE1,"gamma":gamma,"block":np.zeros((cell["y"]+1,cell["x"]+1))})
         L = self.Lorentzian[-1]
         L.update({"w":L["f"]*(2*np.pi),"Gamma":L["gamma"]*(2*np.pi)})
@@ -84,6 +86,7 @@ class simulation:
         '''
         Add a mode that couples to the Lorentzian mode. Not implemented for NiI2
         '''
+        cell = self.cell
         self.coupled.append({"f":f,"g":g,"gamma":gamma,"block":np.zeros((cell["y"]+1,cell["x"]+1))})
         C = self.coupled[-1]
         C.update({"w":C["f"]*(2*np.pi),"Gamma":C["gamma"]*(2*np.pi)})
@@ -112,6 +115,7 @@ class simulation:
         '''
         Define the parameters of the ISRS force term
         '''
+        cell = self.cell
         F = self.force
         F.append({"osc":osc,"F0":F0,"t0":t0,"y0":y0,"vg":vg,"w":w,"alpha":alpha,"type":"ISRS"})
         i = len(F)-1
@@ -123,6 +127,7 @@ class simulation:
         '''
         Define the parameters of the DECP force term
         '''
+        cell.self.cell
         F = self.force
         F.append({"osc":osc,"F0":F0,"t0":t0,"y0":y0,"vg":vg,"trise":trise,"tdecay":tdecay,
                    "alpha":alpha,"type":"DECP"})
@@ -214,6 +219,7 @@ class simulation:
         """
         Add a source in the simulation
         """
+        cell = self.cell
         self.source = {"block":np.zeros((cell["y"]+1,cell["x"]+1)),"func":source_func,
                        "tstart":tstart,"tend":tend,"inte":integrated}
         for i in range(int(ystart),int(yend)+1):
