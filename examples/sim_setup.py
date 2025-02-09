@@ -1,13 +1,26 @@
 ## Sample code for setting up a simulation with pumpprobe FDTD ##
 
 from pumpprobeFDTD import *
+import os
+from tqdm import tqdm # For progress bar display
 
 # Edit the following parameters for your simulation
 kind = "PP" # what kind of experiment to simulate (either "PP","Reference","Emission","Transmission")
-tpps = np.linspace(1,61,300) # an np array of the pump probe time delays to simulate
+tpps = np.linspace(1,61,10) # an np array of the pump probe time delays to simulate
+# For testing purposes, only 10 points is taken to reduce computation time
+# For actually simulation, consider around 300 points
 probe_shift = 30 # Offset the pump and probe pulse so that they arrives earlier to make best use of simulation time
 
-setlabel="set0"
+
+def check_and_create_path(path):
+    if os.path.exists(path):
+        print(f"Warning: {path} already exists, may overwrite previous results.")
+    else:
+        os.makedirs(path)
+        print(f"Path {path} created.")
+
+setlabel="example"
+check_and_create_path(setlabel+"_results/")
 # change setlabel for every set!!
 import sys
 if len(sys.argv) > 1:
@@ -42,7 +55,7 @@ f2 = 1.12
 gamma2 = 0.022
 sigma = 0.2
 probe_E_PP = []
-sample_loc = sample_size+150
+sample_loc = sample_size+150 # where to probe THz field strength
 n_NIR = 2.86
 k_NIR = 0.075
 eps_THz = 10.7
@@ -52,7 +65,7 @@ F0p = -1
 if kind != "PP":
     tpps = [1]
     probe_shift = 30
-for tpp in tpps:
+for tpp in tqdm(tpps, desc="Simulating with tpp"):
     # Simulation for all different pump probe time delays tpps
     # Simulations are performed independently. It is recommended to replace this loop with parallelization
     sim = simulation(cell,Courant=0.4)
@@ -97,5 +110,5 @@ for tpp in tpps:
     else:
         probe_E_PP.append(probe_E[:,sample_loc])
 if kind=="PP":
-    np.savetxt(setlabel+"_results/"+kind+"_kernal%d_tpp.txt"%kernal,tpps)
-    np.save(setlabel+"_results/"+kind+"_kernal%d_probeE"%kernal,np.array(probe_E_PP))
+    np.savetxt(setlabel+"_results/"+kind+"_tpp.txt",tpps)
+    np.save(setlabel+"_results/"+kind+"_probeE",np.array(probe_E_PP)) # PP simulation dataset is large, saving as .npy instead of .txt
