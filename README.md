@@ -18,3 +18,4 @@ cd pumpprobeFDTD
 pip install -e .
 ```
 
+![Example of simulated time trace](assets/example.png)
